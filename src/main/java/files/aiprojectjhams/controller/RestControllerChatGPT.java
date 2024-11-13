@@ -1,14 +1,14 @@
 package files.aiprojectjhams.controller;
 
 
-import files.aiprojectjhams.dto.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import files.aiprojectjhams.dto.chatgpt.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,11 +21,16 @@ public class RestControllerChatGPT {
     @Value("${API}")
     private String openAiKey;
 
+    @Value("${APIWEATHER}")
+    private String weatherApiKey;
+
     private final WebClient webClient;
+    private final WebClient webClient2;
 
 
     public RestControllerChatGPT(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("https://api.openai.com/v1/chat/completions").build();
+        this.webClient2 = webClientBuilder.baseUrl("https://api.weatherstack.com/current").build();
     }
 
 
@@ -35,7 +40,7 @@ public class RestControllerChatGPT {
 
         chatRequest.setModel("gpt-4");
         List<Message> listMessages = new ArrayList<>();
-        listMessages.add(new Message("system", "You are a helpful assistant"));
+        listMessages.add(new Message("system", "You are a weather forecaster that looks for the forecast of cities across the world"));
         listMessages.add(new Message("user", message));
         chatRequest.setMessages(listMessages);
         chatRequest.setN(3);
@@ -61,4 +66,20 @@ public class RestControllerChatGPT {
 
         return map;
     }
+
+    @GetMapping("/weather")
+    public Mono<String> getWeather(@RequestParam String city) {
+        return webClient2.get()
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("access_key", weatherApiKey)
+                        .queryParam("query", city)
+                        .build())
+                .retrieve()
+                .bodyToMono(String.class); // Use String for a raw JSON response
+    }
+
+
+
+
+
 }

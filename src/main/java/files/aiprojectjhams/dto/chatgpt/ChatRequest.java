@@ -1,4 +1,4 @@
-package files.aiprojectjhams.dto;
+package files.aiprojectjhams.dto.chatgpt;
 
 import java.util.LinkedHashMap;
 import java.util.List;
