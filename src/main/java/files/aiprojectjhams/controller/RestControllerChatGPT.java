@@ -35,17 +35,17 @@ public class RestControllerChatGPT {
 
 
     @GetMapping("/chat")
-    public Map<String, Object> chat(@RequestParam String message) {
+    public Map<String, Object> chat(@RequestParam String city) {
         ChatRequest chatRequest = new ChatRequest();
 
         chatRequest.setModel("gpt-4");
         List<Message> listMessages = new ArrayList<>();
-        listMessages.add(new Message("system", "You are a weather forecaster that looks for the forecast of cities across the world"));
-        listMessages.add(new Message("user", message));
+        listMessages.add(new Message("system", "You are a weather forecaster that looks for the forecast of cities across the world. i would also like for u to give suggestions on outdoor activity and clothing based on weather"));
+        listMessages.add(new Message("user", getWeather(city)));
         chatRequest.setMessages(listMessages);
         chatRequest.setN(3);
         chatRequest.setTemperature(1);
-        chatRequest.setMaxTokens(50);
+        chatRequest.setMaxTokens(200);
         chatRequest.setStream(false);
         chatRequest.setPresencePenalty(1);
 
@@ -67,19 +67,19 @@ public class RestControllerChatGPT {
         return map;
     }
 
-    @GetMapping("/weather")
-    public Mono<String> getWeather(@RequestParam String city) {
+
+
+
+
+    public String getWeather(@RequestParam String city) {
         return webClient2.get()
                 .uri(uriBuilder -> uriBuilder
                         .queryParam("access_key", weatherApiKey)
                         .queryParam("query", city)
                         .build())
                 .retrieve()
-                .bodyToMono(String.class); // Use String for a raw JSON response
+                .bodyToMono(String.class).block(); // Use String for a raw JSON response
     }
-
-
-
 
 
 }
