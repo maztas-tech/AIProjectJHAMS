@@ -20,13 +20,15 @@ public class RestControllerWeatherStack {
     private final WebClient webClient;
 
     public RestControllerWeatherStack(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://api.weatherstack.com/current?").build();
+        this.webClient = webClientBuilder.baseUrl("https://api.weatherstack.com/current").build();
     }
-
+    /*
     @GetMapping("/weather")
     public Map<String, Object> getWeather(@RequestParam String query) {
 
 
 
     }
+
+     */
 }

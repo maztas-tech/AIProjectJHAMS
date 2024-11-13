@@ -1,5 +1,5 @@
 
-package files.aiprojectjhams.dto;
+package files.aiprojectjhams.dto.weatherstack;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
