@@ -2,6 +2,8 @@ package files.aiprojectjhams.controller;
 
 
 import files.aiprojectjhams.dto.chatgpt.*;
+import files.aiprojectjhams.service.ChatGPTService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,16 +23,21 @@ public class RestControllerChatGPT {
     @Value("${API}")
     private String openAiKey;
 
-    @Value("${APIWEATHER}")
-    private String weatherApiKey;
+
 
     private final WebClient webClient;
-    private final WebClient webClient2;
+    //private final WebClient webClient2;
 
+    private final String systemMode = """
+            You are a weather reporter that looks for the forecast of cities across the world. 
+            I would also like for you to give suggestions for outdoor activities and clothing based on weather
+            """;
+    @Autowired
+    private ChatGPTService chatGPTService;
 
     public RestControllerChatGPT(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.baseUrl("https://api.openai.com/v1/chat/completions").build();
-        this.webClient2 = webClientBuilder.baseUrl("https://api.weatherstack.com/current").build();
+
     }
 
 
@@ -40,12 +47,12 @@ public class RestControllerChatGPT {
 
         chatRequest.setModel("gpt-4");
         List<Message> listMessages = new ArrayList<>();
-        listMessages.add(new Message("system", "You are a weather forecaster that looks for the forecast of cities across the world. i would also like for u to give suggestions on outdoor activity and clothing based on weather"));
-        listMessages.add(new Message("user", getWeather(city)));
+        listMessages.add(new Message("system", systemMode));
+        listMessages.add(new Message("user", chatGPTService.getWeather(city)));
         chatRequest.setMessages(listMessages);
         chatRequest.setN(3);
         chatRequest.setTemperature(1);
-        chatRequest.setMaxTokens(200);
+        chatRequest.setMaxTokens(500);
         chatRequest.setStream(false);
         chatRequest.setPresencePenalty(1);
 
@@ -71,15 +78,7 @@ public class RestControllerChatGPT {
 
 
 
-    public String getWeather(@RequestParam String city) {
-        return webClient2.get()
-                .uri(uriBuilder -> uriBuilder
-                        .queryParam("access_key", weatherApiKey)
-                        .queryParam("query", city)
-                        .build())
-                .retrieve()
-                .bodyToMono(String.class).block(); // Use String for a raw JSON response
-    }
+
 
 
 }
